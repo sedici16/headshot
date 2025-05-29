@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+
+    <link href="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genera Ritratto AI // Professinal Headshot Generator</title>
+
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+     function updatePrompts() {
+         const lang = document.getElementById('lang').value;
+         const gender = document.getElementById('gender').value;
+ 
+         const prompts = {
+             it: {
+                 male: {
+                     prompt1: "un ritratto professionale realistico di un uomo in un ambiente lavorativo elegante, luce morbida",
+                     neg1: "cartone animato, sfocato, distorto, sproporzionato",
+                     prompt2: "uno sfondo moderno tipo ufficio di una startup con dettagli soft",
+                     neg2: "vuoto, disordinato, scuro, pixelato, disegno, manga, sformato, distorto",
+                     prompt3: "un completo elegante con giacca e cravatta",
+                     neg3: "t-shirt, abbigliamento sportivo, colori accesi, testo, scritte, logo, disegno, manga, sformato, sproporzionato, distorto"
+                 },
+                 female: {
+                     prompt1: "un ritratto professionale realistico di una donna sorridente in un ambiente lavorativo elegante, luce naturale",
+                     neg1: "cartone animato, sfocato, distorto, sproporzionato",
+                     prompt2: "uno sfondo moderno tipo ufficio di una startup con atmosfera calda",
+                     neg2: "vuoto, disordinato, scuro, pixelato, disegno, manga, sformato, distorto",
+                     prompt3: "un tailleur elegante da donna con colori neutri",
+                     neg3: "t-shirt, abbigliamento sportivo, colori accesi, testo, scritte, logo, disegno, manga, sformato, sproporzionato, distorto"
+                 }
+             },
+             en: {
+                 male: {
+                     prompt1: "a realistic professional portrait of a man in a classy work environment, soft lighting",
+                     neg1: "cartoon, blurry, distorted, unnatural proportions",
+                     prompt2: "a modern startup-style office background with warm tones",
+                     neg2: "empty, messy, dark, low-resolution, drawing, manga, malformed furniture",
+                     prompt3: "a sharp suit and tie in neutral tones",
+                     neg3: "t-shirt, casual clothing, flashy colors, logo, text, writing, malforned cloting"
+                 },
+                 female: {
+                     prompt1: "a realistic professional portrait of a smiling woman in an elegant workplace, natural light",
+                     neg1: "cartoon, blurry, distorted, unnatural proportions",
+                     prompt2: "a modern startup-style office background with cozy details",
+                     neg2: "empty, messy, dark, low-resolution, drawing, manga, malformed furniture",
+                     prompt3: "a smart business suit for women in soft tones",
+                     neg3: "t-shirt, casual clothing, flashy colors, logo, text, writing, malforned cloting"
+                 }
+             }
+         };
+ 
+         const p = prompts[lang][gender];
+         document.getElementsByName('prompt_1')[0].value = p.prompt1;
+         document.getElementsByName('neg_1')[0].value = p.neg1;
+         document.getElementsByName('prompt_2')[0].value = p.prompt2;
+         document.getElementsByName('neg_2')[0].value = p.neg2;
+         document.getElementsByName('prompt_3')[0].value = p.prompt3;
+         document.getElementsByName('neg_3')[0].value = p.neg3;
+     }
+ 
+     // Autopopola all'avvio
+     window.onload = updatePrompts;
+ </script>
+ 
+</head>
+<body class="bg-gray-50 font-sans p-6">
+    <div class="max-w-3xl mx-auto bg-white p-6 rounded-xl shadow-lg">
+        <h1 class="text-2xl font-bold mb-4">🧠 Genera Ritratto AI</h1>
+        <div class="mb-6">
+         <p class="font-semibold mb-2">📷 Esempio di selfie corretto vs scorretto:</p>
+         <img src="{{ url_for('static', filename='example.png') }}" alt="Esempio selfie"
+              class="w-1/2 mx-auto rounded shadow border">
+         <p class="text-sm text-gray-600 mt-2 text-center">A sinistra: esempio valido. A destra: troppo distante, sfondo complesso, effetti indesiderati.</p>
+        </div>
+     
+
+        <form method="POST" enctype="multipart/form-data">
+
+         <div class="mb-4">
+          <label class="font-semibold">Upload immagine:</label><br>
+          <input type="file" id="imageInput" accept="image/*" required>
+          
+          <div class="mt-4">
+            <img id="preview" class="max-w-full max-h-64 rounded border hidden" />
+          </div>
+        
+          <!-- Campo nascosto che conterrà il risultato del crop -->
+          <input type="hidden" name="cropped_image" id="croppedImage">
+        </div>
+
+        <div class="mb-6">
+         <label class="block font-semibold mb-2">Lingua:</label>
+         <div class="flex gap-4">
+           <button type="button" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" onclick="document.getElementById('lang').value='it'; updatePrompts();">🇮🇹 Italiano</button>
+           <button type="button" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" onclick="document.getElementById('lang').value='en'; updatePrompts();">🇬🇧 English</button>
+         </div>
+       </div>
+       
+        
+
+         
+         <div class="mb-6">
+             <label class="block font-semibold mb-2">Genere:</label>
+             <div class="flex gap-4">
+                 <button type="button" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700" onclick="document.getElementById('gender').value='female'; updatePrompts();">👩 Donna</button>
+                 <button type="button" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700" onclick="document.getElementById('gender').value='male'; updatePrompts();">👨 Uomo</button>
+             </div>
+         </div>
+         
+         <!-- Hidden selects usati dallo script -->
+         <select id="lang" class="hidden">
+             <option value="it" selected></option>
+             <option value="en"></option>
+             <option value="en"></option>
+         </select>
+         <select id="gender" class="hidden">
+             <option value="female" selected></option>
+             <option value="male"></option>
+         </select>
+         
+
+            <hr class="my-4">
+            <h2 class="font-semibold text-lg">Passaggio 1: Miglioramento Ritratto</h2>
+            <textarea name="prompt_1" rows="3" class="w-full border p-2"></textarea>
+            <textarea name="neg_1" rows="2" class="w-full border p-2 mt-2" placeholder="Prompt negativo (es. cartone animato, sfocato)"></textarea>
+            <label>Forza trasformazione (0 = minima, 1 = massima, per uomo conisgliamo 0):</label>
+            <input type="range" name="strength_1" min="0.1" max="1" step="0.1" value="0.2" class="w-full">
+            <label>Guidance (quanto seguire il prompt, valore più alto = più preciso):</label>
+            <input type="range" name="guidance_1" min="1" max="20" value="17" class="w-full">
+
+            <h2 class="font-semibold text-lg mt-6">Passaggio 2: Sfondo</h2>
+            <textarea name="prompt_2" rows="3" class="w-full border p-2"></textarea>
+            <textarea name="neg_2" rows="2" class="w-full border p-2 mt-2" placeholder="Prompt negativo per sfondo (es. vuoto, disordinato)"></textarea>
+            <label>Guidance:</label>
+            <input type="range" name="guidance_2" min="1" max="20" value="10" class="w-full">
+
+            <h2 class="font-semibold text-lg mt-6">Passaggio 3: Abbigliamento</h2>
+            <textarea name="prompt_3" rows="3" class="w-full border p-2"></textarea>
+            <textarea name="neg_3" rows="2" class="w-full border p-2 mt-2" placeholder="Prompt negativo per outfit (es. t-shirt, casual)"></textarea>
+            <label>Guidance:</label>
+            <input type="range" name="guidance_3" min="1" max="20" value="17" class="w-full">
+
+
+            <div id="loadingSpinner" class="mt-4 hidden flex items-center justify-center text-blue-600 font-semibold">
+             <svg class="animate-spin h-5 w-5 mr-2 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+             </svg>
+             Waiting /// Generazione in corso...
+            </div>
+
+            {% if used is defined %}
+            <div class="mb-4 text-sm text-gray-700 font-semibold bg-yellow-100 border border-yellow-300 p-3 rounded">
+                🔄 Generazioni rimanenti: {{ 20 - used }} su 20
+            </div>
+            {% endif %}
+         
+
+            <button type="submit" class="mt-6 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">✨ Genera Ritratto</button>
+        </form>
+
+        {% if status %}
+            <p class="mt-4 text-red-600 font-semibold">Status: {{ status }}</p>
+        {% endif %}
+
+        {% if outputs %}
+            <h2 class="text-xl font-bold mt-6">🖼️ Risultato:</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                {% for path in outputs %}
+                    <img src="{{ path }}" class="rounded shadow">
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+     document.querySelector("form").addEventListener("submit", function() {
+         document.getElementById("loadingSpinner").classList.remove("hidden");
+     });
+    </script>
+
+
+<script>
+ let cropper;
+ 
+ document.getElementById('imageInput').addEventListener('change', function (e) {
+   const file = e.target.files[0];
+   if (file) {
+     const reader = new FileReader();
+     reader.onload = function (event) {
+       const img = document.getElementById('preview');
+       img.src = event.target.result;
+       img.style.display = 'block';
+ 
+       if (cropper) cropper.destroy();
+       cropper = new Cropper(img, {
+         aspectRatio: 1,
+         viewMode: 1,
+         autoCropArea: 1,
+       });
+     };
+     reader.readAsDataURL(file);
+   }
+ });
+ 
+ document.querySelector("form").addEventListener("submit", function (e) {
+   e.preventDefault(); // Ferma l'invio per processare prima il crop
+ 
+   if (cropper) {
+     const canvas = cropper.getCroppedCanvas({
+       width: 1024,
+       height: 1024,
+       imageSmoothingEnabled: true,
+       imageSmoothingQuality: 'high'
+     });
+ 
+     const jpegData = canvas.toDataURL("image/jpeg", 0.9);
+     document.getElementById("croppedImage").value = jpegData;
+ 
+     document.getElementById("loadingSpinner").classList.remove("hidden");
+ 
+     // Invia il form manualmente dopo il crop
+     document.querySelector("form").submit();
+   }
+ });
+ </script>
+ 
+ 
+ 
+
+
+
+
+</body>
+</html>

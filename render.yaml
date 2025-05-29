@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: ritrattoai
+    env: python
+    buildCommand: ""
+    startCommand: gunicorn app:app --timeout 90
+    envVars:
+      - key: HF_TOKEN
+        sync: false
+    autoDeploy: true

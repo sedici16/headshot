@@ -1,0 +1,5 @@
+flask==2.3.3
+gradio_client==1.10.0
+Pillow==10.3.0
+requests==2.31.0
+gunicorn==21.2.0
