@@ -3,4 +3,5 @@ echo "__pycache__/
 .env
 *.sqlite
 static/results/
+!static/example.png
 " > .gitignore
