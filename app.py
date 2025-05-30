@@ -14,9 +14,15 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 app = Flask(__name__)
 
 app.config['MAX_CONTENT_LENGTH'] = 200 * 1024 * 1024  # 10 MB
+
 client = Client("theoracle/professional_head", hf_token=os.getenv("HF_TOKEN"))
 
 session_counts = {}
+
+@app.route("/")
+def homepage():
+    return render_template("index.html")
+
 
 @app.route("/form", methods=["GET", "POST"])
 def index():
