@@ -6,7 +6,8 @@ import os
 import uuid
 import base64
 import io
-
+from dotenv import load_dotenv
+load_dotenv()
 
 
 from werkzeug.middleware.proxy_fix import ProxyFix
