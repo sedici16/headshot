@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, send_from_directory
+from flask import Flask, render_template, request, send_from_directory, session
 from gradio_client import Client, handle_file 
 from PIL import Image
 import tempfile
@@ -6,6 +6,9 @@ import os
 import uuid
 import base64
 import io
+from dotenv import load_dotenv
+load_dotenv()
+
 
 from werkzeug.middleware.proxy_fix import ProxyFix
 
@@ -16,6 +19,9 @@ app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 200 * 1024 * 1024  # 10 MB
 
 client = Client("theoracle/professional_head", hf_token=os.getenv("HF_TOKEN"))
+app.secret_key = "my-dev-secret-key"
+
+
 
 session_counts = {}
 
@@ -39,23 +45,41 @@ def index():
 
 
         cropped_data = request.form.get("cropped_image")
-        if not cropped_data:
-            return render_template("form.html", error="❌ Nessuna immagine croppata trovata.")
 
-        print("📤 Cropped image received")
+        # 🧠 Save all form fields in session for reuse
+        fields_to_remember = [
+            "prompt_1", "neg_1", "strength_1", "guidance_1",
+            "prompt_2", "neg_2", "guidance_2",
+            "prompt_3", "neg_3", "guidance_3"
+        ]
 
-        # Decodifica il base64
-        base64_data = cropped_data.split(",")[1]
-        image_bytes = base64.b64decode(base64_data)
-        image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+        session["form_data"] = {field: request.form.get(field) for field in fields_to_remember}
 
-        # Salva su disco
-        filename = f"{uuid.uuid4().hex}.png"
-        image_path = os.path.join("static/results", filename)
-        os.makedirs(os.path.dirname(image_path), exist_ok=True)
-        image.save(image_path)
-        print(f"✅ Cropped image saved to: {image_path}")
+        print(f"📎 Length of cropped_image: {len(cropped_data) if cropped_data else 'None'}")
 
+
+
+
+        if cropped_data:
+            print("📤 Cropped image received")
+            base64_data = cropped_data.split(",")[1]
+            image_bytes = base64.b64decode(base64_data)
+            image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+
+            filename = f"{uuid.uuid4().hex}.png"
+            image_path = os.path.join("static/results", filename)
+            os.makedirs(os.path.dirname(image_path), exist_ok=True)
+            image.save(image_path)
+            session["image_path"] = image_path
+            print(f"✅ Cropped image saved to: {image_path}")
+            print("🔄 Overwriting previous image_path with new one.")
+
+        elif "image_path" in session:
+            image_path = session["image_path"]
+            print(f"🔁 Reusing previous image: {image_path}")
+
+        else:
+            return render_template("form.html", error="❌ Nessuna immagine trovata. Per favore carica un'immagine.")
 
 
 
@@ -103,12 +127,14 @@ def index():
 
             session_counts[session_id] += 1
             print(f"✅ Updated session count: {session_counts}")
-            return render_template("form.html", outputs=out_paths, used=session_counts[session_id])
+            return render_template("form.html", outputs=out_paths, used=session_counts[session_id], image_path=image_path, form_data=session.get("form_data", {}))
+
 
         except Exception as e:
             return render_template("form.html", error=f"❌ {type(e).__name__}: {e}")
 
-    return render_template("form.html")
+    return render_template("form.html", image_path=session.get("image_path"), form_data=session.get("form_data", {}))
+
 
 @app.route('/static/results/<path:filename>')
 def serve_image(filename):

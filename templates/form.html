@@ -18,38 +18,38 @@
          const prompts = {
              it: {
                  male: {
-                     prompt1: "un ritratto professionale realistico di un uomo in un ambiente lavorativo elegante, luce morbida",
+                     prompt1: "un ritratto professionale di un uomo",
                      neg1: "cartone animato, sfocato, distorto, sproporzionato",
-                     prompt2: "uno sfondo moderno tipo ufficio di una startup con dettagli soft",
-                     neg2: "vuoto, disordinato, scuro, pixelato, disegno, manga, sformato, distorto",
+                     prompt2: "uno sfondo moderno tipo ufficio di una startup, computer, finestre piante",
+                     neg2: "vuoto, disordinato, scuro, pixelato, disegno, manga, sformato, distorto, mobili deformi, mani deformi",
                      prompt3: "un completo elegante con giacca e cravatta",
-                     neg3: "t-shirt, abbigliamento sportivo, colori accesi, testo, scritte, logo, disegno, manga, sformato, sproporzionato, distorto"
+                     neg3: "t-shirt, abbigliamento sportivo, colori accesi, testo, scritte, logo, disegno, manga, sformato, sproporzionato, distorto, abbigliamento deforme"
                  },
                  female: {
-                     prompt1: "un ritratto professionale realistico di una donna sorridente in un ambiente lavorativo elegante, luce naturale",
+                     prompt1: "un ritratto professionale di una donna",
                      neg1: "cartone animato, sfocato, distorto, sproporzionato",
                      prompt2: "uno sfondo moderno tipo ufficio di una startup con atmosfera calda",
-                     neg2: "vuoto, disordinato, scuro, pixelato, disegno, manga, sformato, distorto",
+                     neg2: "vuoto, disordinato, scuro, pixelato, disegno, manga, sformato, distorto, mobili deformi",
                      prompt3: "un tailleur elegante da donna con colori neutri",
-                     neg3: "t-shirt, abbigliamento sportivo, colori accesi, testo, scritte, logo, disegno, manga, sformato, sproporzionato, distorto"
+                     neg3: "t-shirt, abbigliamento sportivo, colori accesi, testo, scritte, logo, disegno, manga, sformato, sproporzionato, distorto, vesititi deformi"
                  }
              },
              en: {
                  male: {
-                     prompt1: "a realistic professional portrait of a man in a classy work environment, soft lighting",
+                     prompt1: "a professional portrait of a man",
                      neg1: "cartoon, blurry, distorted, unnatural proportions",
-                     prompt2: "a modern startup-style office background with warm tones",
-                     neg2: "empty, messy, dark, low-resolution, drawing, manga, malformed furniture",
+                     prompt2: "a modern startup-style office background with warm tones, computers, plants",
+                     neg2: "empty, messy, dark, low-resolution, drawing, manga, malformed furniture, deformation, deformed hands",
                      prompt3: "a sharp suit and tie in neutral tones",
-                     neg3: "t-shirt, casual clothing, flashy colors, logo, text, writing, malforned cloting"
+                     neg3: "t-shirt, casual clothing, flashy colors, logo, text, writing, malforned cloting, deformation"
                  },
                  female: {
-                     prompt1: "a realistic professional portrait of a smiling woman in an elegant workplace, natural light",
+                     prompt1: "a professional portrait of woman",
                      neg1: "cartoon, blurry, distorted, unnatural proportions",
-                     prompt2: "a modern startup-style office background with cozy details",
-                     neg2: "empty, messy, dark, low-resolution, drawing, manga, malformed furniture",
+                     prompt2: "a modern startup-style office background with cozy details, computers, plants",
+                     neg2: "empty, messy, dark, low-resolution, drawing, manga, malformed furniture, deformation, deformed hands",
                      prompt3: "a smart business suit for women in soft tones",
-                     neg3: "t-shirt, casual clothing, flashy colors, logo, text, writing, malforned cloting"
+                     neg3: "t-shirt, casual clothing, flashy colors, logo, text, writing, malforned clothing, deformation"
                  }
              }
          };
@@ -64,7 +64,15 @@
      }
  
      // Autopopola all'avvio
-     window.onload = updatePrompts;
+     function updatePromptsIfEmpty() {
+        const p1 = document.getElementsByName('prompt_1')[0];
+        if (p1 && p1.value.trim() === "") {
+            updatePrompts();
+        }
+    }
+
+window.onload = updatePromptsIfEmpty;
+
  </script>
  
 </head>
@@ -83,10 +91,12 @@
 
          <div class="mb-4">
           <label class="font-semibold">Upload immagine:</label><br>
-          <input type="file" id="imageInput" accept="image/*" required>
+          <input type="file" id="imageInput" accept="image/*" {% if not image_path %}required{% endif %}>
+
           
           <div class="mt-4">
-            <img id="preview" class="max-w-full max-h-64 rounded border hidden" />
+            <img id="preview" src="{{ image_path }}" class="max-w-full max-h-64 rounded border {% if not image_path %}hidden{% endif %}" />
+
           </div>
         
           <!-- Campo nascosto che conterrà il risultato del crop -->
@@ -126,27 +136,44 @@
 
             <hr class="my-4">
             <h2 class="font-semibold text-lg">Passaggio 1: Miglioramento Ritratto</h2>
-            <textarea name="prompt_1" rows="3" class="w-full border p-2"></textarea>
-            <textarea name="neg_1" rows="2" class="w-full border p-2 mt-2" placeholder="Prompt negativo (es. cartone animato, sfocato)"></textarea>
-            <label>Forza trasformazione (0 = minima, 1 = massima, per uomo conisgliamo 0):</label>
-            <input type="range" name="strength_1" min="0.1" max="1" step="0.1" value="0.2" class="w-full">
-            <label>Guidance (quanto seguire il prompt, valore più alto = più preciso):</label>
-            <input type="range" name="guidance_1" min="1" max="20" value="17" class="w-full">
 
-            <h2 class="font-semibold text-lg mt-6">Passaggio 2: Sfondo</h2>
-            <textarea name="prompt_2" rows="3" class="w-full border p-2"></textarea>
-            <textarea name="neg_2" rows="2" class="w-full border p-2 mt-2" placeholder="Prompt negativo per sfondo (es. vuoto, disordinato)"></textarea>
-            <label>Guidance:</label>
-            <input type="range" name="guidance_2" min="1" max="20" value="10" class="w-full">
+            <!-- Passaggio 1: Ritratto -->
+        <textarea name="prompt_1" rows="3" class="w-full border p-2">{{ form_data.prompt_1 or '' }}</textarea>
 
-            <h2 class="font-semibold text-lg mt-6">Passaggio 3: Abbigliamento</h2>
-            <textarea name="prompt_3" rows="3" class="w-full border p-2"></textarea>
-            <textarea name="neg_3" rows="2" class="w-full border p-2 mt-2" placeholder="Prompt negativo per outfit (es. t-shirt, casual)"></textarea>
-            <label>Guidance:</label>
-            <input type="range" name="guidance_3" min="1" max="20" value="17" class="w-full">
+        <textarea name="neg_1" rows="2" class="w-full border p-2 mt-2" placeholder="Prompt negativo (es. cartone animato, sfocato)">
+        {{ form_data.neg_1 or '' }}</textarea>
+
+        <label>Forza trasformazione (0 = minima, 1 = massima):</label>
+        <input type="range" name="strength_1" min="0.1" max="1" step="0.1"
+            value="{{ form_data.strength_1 or '0.1' }}" class="w-full">
+
+        <label>Guidance:</label>
+        <input type="range" name="guidance_1" min="1" max="20"
+            value="{{ form_data.guidance_1 or '17' }}" class="w-full">
 
 
-            <div id="loadingSpinner" class="mt-4 hidden flex items-center justify-center text-blue-600 font-semibold">
+        <!-- Passaggio 2: Sfondo -->
+        <h2 class="font-semibold text-lg mt-6">Passaggio 2: Sfondo</h2>
+
+        <textarea name="prompt_2" rows="3" class="w-full border p-2">{{ form_data.prompt_2 or '' }}</textarea>
+
+        <textarea name="neg_2" rows="2" class="w-full border p-2 mt-2" placeholder="Prompt negativo per sfondo (es. vuoto, disordinato)">{{ form_data.neg_2 or '' }}</textarea>
+
+        <label>Guidance:</label>
+        <input type="range" name="guidance_2" min="1" max="20" value="{{ form_data.guidance_2 or '10' }}" class="w-full">
+
+
+        <!-- Passaggio 3: Abbigliamento -->
+        <h2 class="font-semibold text-lg mt-6">Passaggio 3: Abbigliamento</h2>
+
+        <textarea name="prompt_3" rows="3" class="w-full border p-2">{{ form_data.prompt_3 or '' }}</textarea>
+
+        <textarea name="neg_3" rows="2" class="w-full border p-2 mt-2" placeholder="Prompt negativo per outfit (es. t-shirt, casual)"> {{ form_data.neg_3 or '' }}</textarea>
+
+        <label>Guidance:</label>
+        <input type="range" name="guidance_3" min="1" max="20" value="{{ form_data.guidance_3 or '17' }}" class="w-full">
+
+              <div id="loadingSpinner" class="mt-4 hidden flex items-center justify-center text-blue-600 font-semibold">
              <svg class="animate-spin h-5 w-5 mr-2 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
@@ -209,25 +236,48 @@
  });
  
  document.querySelector("form").addEventListener("submit", function (e) {
-   e.preventDefault(); // Ferma l'invio per processare prima il crop
- 
-   if (cropper) {
-     const canvas = cropper.getCroppedCanvas({
-       width: 1024,
-       height: 1024,
-       imageSmoothingEnabled: true,
-       imageSmoothingQuality: 'high'
-     });
- 
-     const jpegData = canvas.toDataURL("image/jpeg", 0.7);
-     document.getElementById("croppedImage").value = jpegData;
- 
-     document.getElementById("loadingSpinner").classList.remove("hidden");
- 
-     // Invia il form manualmente dopo il crop
-     document.querySelector("form").submit();
-   }
- });
+  const form = e.target;
+  const imgInput = document.getElementById("imageInput");
+  const hiddenCropInput = document.getElementById("croppedImage");
+  const previewImg = document.getElementById("preview");
+  const hasFile = imgInput && imgInput.files.length > 0;
+
+  if (hasFile) {
+    e.preventDefault(); // block to crop first
+
+    if (!cropper) {
+      alert("Errore: il cropper non è stato inizializzato.");
+      return;
+    }
+
+    const canvas = cropper.getCroppedCanvas({
+      width: 1024,
+      height: 1024,
+      imageSmoothingEnabled: true,
+      imageSmoothingQuality: 'high'
+    });
+
+    if (!canvas) {
+      alert("Errore: impossibile ottenere il canvas.");
+      return;
+    }
+
+    const jpegData = canvas.toDataURL("image/jpeg", 0.7);
+    hiddenCropInput.value = jpegData;
+
+    document.getElementById("loadingSpinner").classList.remove("hidden");
+
+    setTimeout(() => form.submit(), 100);
+  } else if (hiddenCropInput.value || "{{ image_path | default('') }}".trim() !== "") {
+    document.getElementById("loadingSpinner").classList.remove("hidden");
+    // continue with submit
+  } else {
+    e.preventDefault();
+    alert("Per favore carica o seleziona un'immagine.");
+  }
+});
+
+
  </script>
  
  
