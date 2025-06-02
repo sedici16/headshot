@@ -83,7 +83,18 @@ window.onload = updatePromptsIfEmpty;
          <p class="font-semibold mb-2">📷 Esempio di selfie corretto vs scorretto:</p>
          <img src="{{ url_for('static', filename='example.png') }}" alt="Esempio selfie"
               class="w-1/2 mx-auto rounded shadow border">
-         <p class="text-sm text-gray-600 mt-2 text-center">A sinistra: esempio valido. A destra: troppo distante, sfondo complesso, effetti indesiderati.</p>
+         <p class="text-sm text-gray-600 mt-2 text-center">
+                Carica un selfie con viso centrato, abbigliamento visibile (maglietta o camicia) e sfondo neutro. Evita immagini troppo lontane, troppo ravvicinate o senza vestiti visibili.
+         </p>
+
+         <p class="text-sm text-gray-600 mt-1 text-center">
+          Upload a selfie with a centered face, visible clothing (t-shirt or shirt), and a simple background. Avoid photos that are too far, too close, or without visible clothing.
+         </p>
+          
+          
+              
+
+              
         </div>
      
 
@@ -121,6 +132,17 @@ window.onload = updatePromptsIfEmpty;
                  <button type="button" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700" onclick="document.getElementById('gender').value='male'; updatePrompts();">👨 Uomo</button>
              </div>
          </div>
+
+         <!-- Bottone per aprire il popup -->
+        <button type="button"  onclick="togglePopup('popup')" class="bg-blue-600 text-white px-4 py-2 rounded">
+          ℹ️ Istruzioni
+        </button>
+
+        <!-- Bottone per aprire il popup EN -->
+        <button type="button" onclick="togglePopup('popup-en')" class="bg-blue-600 text-white px-4 py-2 rounded ml-2">
+          ℹ️ Instructions
+        </button>
+
          
          <!-- Hidden selects usati dallo script -->
          <select id="lang" class="hidden">
@@ -138,7 +160,7 @@ window.onload = updatePromptsIfEmpty;
             <h2 class="font-semibold text-lg">Passaggio 1: Miglioramento Ritratto</h2>
 
             <!-- Passaggio 1: Ritratto -->
-        <textarea name="prompt_1" rows="3" class="w-full border p-2">{{ form_data.prompt_1 or '' }}</textarea>
+        <textarea name="prompt_1" rows="3" class="w-full border p-2">{{ form_data.get('prompt_1', '') }}</textarea>
 
         <textarea name="neg_1" rows="2" class="w-full border p-2 mt-2" placeholder="Prompt negativo (es. cartone animato, sfocato)">
         {{ form_data.neg_1 or '' }}</textarea>
@@ -285,6 +307,45 @@ window.onload = updatePromptsIfEmpty;
   {% endif %}
   </script>
 
+
+<!-- Popup -->
+<div id="popup" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+  <div class="bg-white max-w-sm p-6 rounded-xl shadow-lg text-left">
+    <h2 class="text-lg font-semibold mb-3 text-center">🧠 Come usare i prompt</h2>
+    <ul class="text-sm text-gray-700 list-disc list-inside space-y-2">
+      <li><strong>Prompt positivo:</strong> descrivi cosa vuoi (es. <em>giacca elegante</em>).</li>
+      <li><strong>Prompt negativo:</strong> descrivi cosa evitare (es. <em>sfocato, distorto</em>).</li>
+      <li><strong>Forza trasformazione:</strong> controlla quanto cambia l’immagine (da 0 a 1).</li>
+      <li><strong>Guidance:</strong> maggiore valore = maggiore aderenza al prompt.</li>
+      <li>Evita parole generiche come "bella" o "buona".</li>
+      <li>Per risultati migliori, usa frasi brevi e chiare.</li>
+    </ul>
+    <button onclick="togglePopup('popup')" class="mt-4 w-full bg-blue-600 text-white px-4 py-2 rounded">Chiudi</button>
+  </div>
+</div>
+
+<!-- Popup EN -->
+<div id="popup-en" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+  <div class="bg-white max-w-sm p-6 rounded-xl shadow-lg text-left">
+    <h2 class="text-lg font-semibold mb-3 text-center">🧠 How to Use Prompts</h2>
+    <ul class="text-sm text-gray-700 list-disc list-inside space-y-2">
+      <li><strong>Positive prompt:</strong> describe what you want (e.g., <em>smart suit</em>).</li>
+      <li><strong>Negative prompt:</strong> describe what to avoid (e.g., <em>blurry, distorted</em>).</li>
+      <li><strong>Transformation strength:</strong> controls how much the image is altered (0 to 1).</li>
+      <li><strong>Guidance:</strong> higher value = more accurate results.</li>
+      <li>Avoid vague words like "nice" or "good".</li>
+      <li>Use clear and short phrases for best results.</li>
+    </ul>
+    <button onclick="togglePopup('popup-en')" class="mt-4 w-full bg-blue-600 text-white px-4 py-2 rounded">Close</button>
+  </div>
+</div>
+
+
+<script>
+  function togglePopup(id) {
+    document.getElementById(id).classList.toggle("hidden");
+  }
+</script>
 
 
  
