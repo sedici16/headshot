@@ -277,8 +277,16 @@ window.onload = updatePromptsIfEmpty;
   }
 });
 
-
  </script>
+
+ <script>
+  {% if error %}
+    alert("{{ error }}");
+  {% endif %}
+  </script>
+
+
+
  
  
  

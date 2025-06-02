@@ -77,7 +77,12 @@ def index():
             print(f"🔁 Reusing previous image: {image_path}")
 
         else:
-            return render_template("form.html", error="❌ Nessuna immagine trovata. Per favore carica un'immagine.")
+            return render_template(
+                "form.html",
+                error="❌ Nessuna immagine trovata. Per favore carica un'immagine.",
+                form_data=session.get("form_data", {}),
+                image_path=None
+)
 
 
 
@@ -104,10 +109,19 @@ def index():
             print("📐 Type of result:", type(result))
 
             # Check if result is a tuple and last element is an error string
+            # ✅ Only return the error page if the result contains an error message
             if isinstance(result, tuple) and isinstance(result[-1], str) and result[-1].startswith("🛑"):
                 print("🚨 Hugging Face returned an error message:")
                 print(result[-1])
-                return render_template("form.html", error=result[-1])
+                return render_template(
+                    "form.html",
+                    error=result[-1],
+                    form_data=session.get("form_data", {}),
+                    image_path=session.get("image_path")
+                    )
+
+
+
 
 
 
@@ -116,12 +130,23 @@ def index():
 
 
             out_paths = []
+
             for i, out in enumerate(result[:3]):
+                if out is None:
+                    print(f"⚠️ Step {i+1} returned None — skipping image saving.")
+                    return render_template(
+                        "form.html",
+                        error="🛑 Nessun abbigliamento rilevato. Carica una foto con camicia, giacca o t-shirt visibile.",
+                        form_data=session.get("form_data", {}),
+                        image_path=session.get("image_path")
+                    )
+
                 out_file = f"{uuid.uuid4().hex}_step{i+1}.png"
                 out_path = os.path.join("static/results", out_file)
                 Image.open(out).save(out_path)
-                print(f"🖼️ Output image {i+1} saved to: {out_path}")
                 out_paths.append(out_path)
+
+
 
             session_counts[session_id] += 1
             print(f"✅ Updated session count: {session_counts}")
@@ -129,7 +154,12 @@ def index():
 
 
         except Exception as e:
-            return render_template("form.html", error=f"❌ {type(e).__name__}: {e}")
+            return render_template(
+                "form.html",
+                error=f"❌ {type(e).__name__}: {e}",
+                form_data=session.get("form_data", {}),
+                image_path=session.get("image_path")
+            )
 
     return render_template("form.html", image_path=session.get("image_path"), form_data=session.get("form_data", {}))
 
