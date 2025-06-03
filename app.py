@@ -32,8 +32,9 @@ def homepage():
 def index():
     if request.method == "POST":
         session_id = request.remote_addr
-        session_counts[session_id] = session_counts.get(session_id, 0)
-        print(f"🔁 New request from {session_id}, current count: {session_counts[session_id]}")
+        session_counts[session_id] = session_counts.get(session_id, 0) + 1
+        print(f"🔁 New request from {session_id}, updated count: {session_counts[session_id]}")
+
 
 
         if session_counts[session_id] >= 20:
@@ -149,7 +150,7 @@ def index():
 
 
 
-            session_counts[session_id] += 1
+            
             print(f"✅ Updated session count: {session_counts}")
             return render_template("form.html", outputs=out_paths, used=session_counts[session_id], image_path=image_path, form_data=session.get("form_data", {}))
 
