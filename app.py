@@ -100,7 +100,8 @@ def index():
                 prompt_3=request.form["prompt_3"],
                 neg_3=request.form["neg_3"],
                 guidance_3=int(request.form["guidance_3"]),
-                api_name="/safe_generate_all_steps"
+                api_name="/safe_generate_all_steps",
+                live=False  # ✅ Disable SSE streaming to prevent session error
             )
 
             print("✅ Hugging Face returned results")
