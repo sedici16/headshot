@@ -171,5 +171,23 @@ def serve_image(filename):
     return send_from_directory('static/results', filename)
 
 
+@app.route("/debug/gallery")
+def debug_gallery():
+    from os import listdir
+    from os.path import join, getmtime
+    from datetime import datetime
+
+    files = [
+        {
+            "name": f,
+            "url": f"/static/results/{f}",
+            "time": datetime.fromtimestamp(getmtime(join("static/results", f))).strftime("%Y-%m-%d %H:%M")
+        }
+        for f in sorted(listdir("static/results"), key=lambda f: getmtime(join("static/results", f)), reverse=True)
+    ]
+    return render_template("gallery.html", files=files)
+
+
+
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5000, debug=True)

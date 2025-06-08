@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>🖼️ Gallery</title>
+</head>
+<body>
+  <h1>🖼️ Generated Image Gallery</h1>
+  {% for file in files %}
+    <div style="margin-bottom: 30px;">
+      <p><strong>{{ file.time }}</strong> — {{ file.name }}</p>
+      <img src="{{ file.url }}" style="max-width: 400px;">
+    </div>
+  {% endfor %}
+</body>
+</html>
