@@ -191,3 +191,23 @@ def debug_gallery():
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5000, debug=True)
+
+
+# SEO cluster pages
+from seo_pages import SEO_PAGES
+
+@app.route("/<slug>")
+def seo_page(slug):
+    page = SEO_PAGES.get(slug)
+    if not page:
+        return "Page not found", 404
+    return render_template("seo/base_seo.html", slug=slug, **page)
+
+@app.route("/sitemap.xml")
+def sitemap():
+    urls = ['<url><loc>https://ritratto.xyz/</loc><priority>1.0</priority></url>']
+    urls.append('<url><loc>https://ritratto.xyz/form</loc><priority>0.9</priority></url>')
+    for slug in SEO_PAGES:
+        urls.append(f'<url><loc>https://ritratto.xyz/{slug}</loc><priority>0.7</priority></url>')
+    xml = '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + ''.join(urls) + '</urlset>'
+    return xml, 200, {'Content-Type': 'application/xml'}
