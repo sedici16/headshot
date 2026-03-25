@@ -194,14 +194,14 @@ if __name__ == "__main__":
 
 
 # SEO cluster pages
-from seo_pages import SEO_PAGES
+from seo_pages import SEO_PAGES, get_related_pages
 
 @app.route("/<slug>")
 def seo_page(slug):
     page = SEO_PAGES.get(slug)
     if not page:
         return "Page not found", 404
-    return render_template("seo/base_seo.html", slug=slug, **page)
+    return render_template("seo/base_seo.html", slug=slug, related=get_related_pages(slug), **page)
 
 @app.route("/sitemap.xml")
 def sitemap():

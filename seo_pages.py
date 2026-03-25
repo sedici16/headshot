@@ -154,3 +154,33 @@ SEO_PAGES = {
         "content": '<h2 class="text-2xl font-bold text-gray-800">Your Photo Is Everything on Dating Apps</h2><p>On Tinder, Hinge, and Bumble, your photo gets less than a second of attention. A well-lit, confident photo dramatically increases your matches.</p><h2 class="text-2xl font-bold text-gray-800">What Works on Dating Apps</h2><ul class="list-disc"><li><strong>Solo photo</strong> - no group shots for your main photo</li><li><strong>Good lighting</strong> - natural light is most flattering</li><li><strong>Natural smile</strong> - approachable, not forced</li><li><strong>Look like yourself</strong> - heavily filtered photos backfire</li><li><strong>Show your eyes</strong> - no sunglasses in your main photo</li></ul><h2 class="text-2xl font-bold text-gray-800">AI-Enhanced, Not AI-Fake</h2><p>RitrattoAI enhances your real photo - better lighting, cleaner background, more polished look. You still look like you, just the best version.</p>',
     },
 }
+
+
+# Cluster relationships - related pages for internal linking
+CLUSTERS = {
+    "profession": ["linkedin-headshot", "corporate-headshot", "actor-headshot", "real-estate-agent-headshot", "lawyer-headshot", "doctor-headshot"],
+    "use-case": ["professional-headshot-for-cv", "headshot-for-social-media", "passport-photo-online", "business-card-photo", "ai-headshot-for-dating", "team-headshots"],
+    "guide": ["headshot-tips", "headshot-at-home", "headshot-background-ideas", "ai-headshot-vs-photographer", "best-ai-headshot-generator"],
+    "product": ["ai-headshot-generator", "free-ai-headshot"],
+}
+
+def get_related_pages(slug, limit=4):
+    """Get related pages for internal linking."""
+    related = []
+    my_cluster = None
+    for cluster_name, pages in CLUSTERS.items():
+        if slug in pages:
+            my_cluster = cluster_name
+            for p in pages:
+                if p != slug and p in SEO_PAGES:
+                    related.append({"slug": p, "title": SEO_PAGES[p]["headline"]})
+
+    # Add from other clusters if not enough
+    if len(related) < limit:
+        for s, page in SEO_PAGES.items():
+            if s != slug and not any(r["slug"] == s for r in related):
+                related.append({"slug": s, "title": page["headline"]})
+                if len(related) >= limit:
+                    break
+
+    return related[:limit]
